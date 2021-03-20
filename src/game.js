@@ -1,6 +1,10 @@
 const EventEmitter = require('events')
 const Player = require('./player.js')
 
+const X = 'X';
+const O = 'O';
+const TIE = 'T'
+const EMPTY = ' ';
 
 class Game extends EventEmitter{
     constructor(){
@@ -8,13 +12,38 @@ class Game extends EventEmitter{
         this.players = [];
         this.turn = 0;
         this.board = makeEmptyBoard();
+        this.winner = null;
         this.showBoard()
     }
     addPlayer(player){
         this.players.push(player);
         if(this.players.length == 2){
             this.emit('started')
+            this.emit('move')
         }
+    }
+    makeMove(move){
+        const token = this.turn ? X : O;
+        if(this.board[move[0]][move[1]] === EMPTY)
+            this.board[move[0]][move[1]] = token;
+        if(isGridWon(this.board[move[0]])){
+            console.log(`Player ${this.turn} captured Cell ${move[0]}!`);
+            this.board[move[0]] = token;
+        }
+        else if(isGridTied(this.board[move[0]])){
+            console.log(`Cell ${move[0]} has been tied!`)
+            this.board[move[0]] = TIE;
+        }
+        if(isGridWon(this.board)){
+            console.log(`Player ${this.turn} has Won!!!`);
+            this.winner = this.turn;
+            this.emit('win');
+        }
+        else if(isGridTied(this.board)){
+            console.log(`The game is tied!!!`);
+            this.emit('tie');
+        }
+
     }
     showBoard(){
         for(let i = 0; i < 9; i+=3){
@@ -22,13 +51,15 @@ class Game extends EventEmitter{
             for(let j = 0; j < 9; j+=3){
                 let s = '';
                 for(let k = 0; k < 3; k++){
-                    s += `  ${this.board[i+k][j]} | ${this.board[i+k][j+1]} | ${this.board[i+k][j+2]}  `;
-                    if (k < 2){
+                    if(this.board[i+k] == X || this.board[i+k] == O || this.board[i+k] == TIE)
+                        s += `  ${this.board[i+k]} | ${this.board[i+k]} | ${this.board[i+k]}  `; 
+                    else 
+                        s += `  ${this.board[i+k][j]} | ${this.board[i+k][j+1]} | ${this.board[i+k][j+2]}  `;
+                    if (k < 2)
                         s += '║';
-                    }
                 }
                 console.log(s);
-                if(j%3 < 2)
+                if(j/3 < 2)
                     console.log(' ---+---+--- ║ ---+---+--- ║ ---+---+---');
             }
             console.log('             ║             ║             ');
@@ -44,7 +75,7 @@ function makeEmptyBoard(){
     for(let i = 0; i < 9; ++i){
         arr.push([])
         for(let j = 0; j < 9; ++j){
-            arr[i].push(' ')
+            arr[i].push(EMPTY)
         }
     }
     // arr[0][0] = 'X';
@@ -58,6 +89,29 @@ function makeEmptyBoard(){
     // arr[8][8] = 'X';
     // console.log(arr);
     return arr;
+}
+
+function isGridWon(board){
+    for(let i = 0; i < 9; i+=3){
+        const j = i/3;
+        if(typeof board[i] === 'string' && typeof board[i+1] === 'string' && typeof board[i+2] === 'string')
+            if(board[i] !== EMPTY && board[i] === board[i+1] && board[i+1] === board[i+2]) 
+                return true;
+        if(typeof board[j] === 'string' && typeof board[j+3] === 'string' && typeof board[j+3] === 'string')
+            if(board[j] !== EMPTY && board[j] === board[j+3] && board[j+3] === board[j+6]) 
+                return true; 
+    }
+    if(typeof board[0] === 'string' && typeof board[4] === 'string' && typeof board[8] === 'string')
+        if(board[0] !== EMPTY && board[0] === board[4] && board[4] === board[8]) 
+            return true;
+    if(typeof board[2] === 'string' && typeof board[4] === 'string' && typeof board[6] === 'string')
+        if(board[2] !== EMPTY && board[2] === board[4] && board[4] === board[6]) return true;
+    return false;
+}
+
+function isGridTied(board){
+    if (board.includes(EMPTY)) return false;
+    board.findIndex(e => typeof e === 'object') == -1
 }
 
 module.exports = Game;
