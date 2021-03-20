@@ -17,20 +17,22 @@ class Game extends EventEmitter{
         }
     }
     showBoard(){
-        for(let i = 0; i < 3; ++i){
-            for(let j = 0; j < 3; ++j){
+        for(let i = 0; i < 9; i+=3){
+            console.log('             ║             ║             ');
+            for(let j = 0; j < 9; j+=3){
                 let s = '';
-                for(let k = 3*j; k < 3*j + 3; ++k){
-                    s += `  ${this.board[j][k]} | ${this.board[j+1][k]} | ${this.board[j+2][k]}  `;
-                    if (k%3 < 2){
+                for(let k = 0; k < 3; k++){
+                    s += `  ${this.board[i+k][j]} | ${this.board[i+k][j+1]} | ${this.board[i+k][j+2]}  `;
+                    if (k < 2){
                         s += '║';
                     }
                 }
                 console.log(s);
-                if(j < 2)
+                if(j%3 < 2)
                     console.log(' ---+---+--- ║ ---+---+--- ║ ---+---+---');
             }
-            if(i < 2)
+            console.log('             ║             ║             ');
+            if(i/3 < 2)
                 console.log('═════════════╬═════════════╬═════════════');
         }
         console.log()
@@ -45,6 +47,16 @@ function makeEmptyBoard(){
             arr[i].push(' ')
         }
     }
+    // arr[0][0] = 'X';
+    // arr[1][1] = '0';
+    // arr[2][2] = 'X';
+    // arr[3][3] = '0';
+    // arr[4][4] = 'X';
+    // arr[5][5] = '0';
+    // arr[6][6] = 'X';
+    // arr[7][7] = '0';
+    // arr[8][8] = 'X';
+    // console.log(arr);
     return arr;
 }
 
